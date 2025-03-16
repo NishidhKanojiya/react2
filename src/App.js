@@ -3,6 +3,7 @@
 import { useState } from "react"
 import GraphVisualizer from "./components/GraphVisualizer"
 import AlgorithmInfo from "./components/AlgorithmInfo"
+import Instructions from "./components/Instructions"
 import "./App.css"
 
 function App() {
@@ -22,6 +23,12 @@ function App() {
         >
           Visualizer
         </button>
+        <button
+          className={`tab ${activeTab === "instructions" ? "active" : ""}`}
+          onClick={() => setActiveTab("instructions")}
+        >
+          Instructions
+        </button>
         <button className={`tab ${activeTab === "info" ? "active" : ""}`} onClick={() => setActiveTab("info")}>
           Algorithm Info
         </button>
@@ -30,6 +37,10 @@ function App() {
       <main className="container">
         {activeTab === "visualizer" ? (
           <GraphVisualizer />
+        ) : activeTab === "instructions" ? (
+          <div className="info-container">
+            <Instructions />
+          </div>
         ) : (
           <div className="info-container">
             <AlgorithmInfo />

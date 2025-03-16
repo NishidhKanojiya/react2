@@ -458,11 +458,24 @@ body {
   margin-bottom: 8px;
 }
 
-/* Add these styles to improve the layout */
+/* Two-column layout */
+.two-column-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
 @media (min-width: 768px) {
-  .flex-row {
-    display: flex;
+  .two-column-layout {
     flex-direction: row;
+  }
+
+  .controls-column {
+    width: 40%;
+  }
+
+  .visualization-column {
+    width: 60%;
   }
 
   .graph-container {
@@ -485,12 +498,30 @@ body {
     align-items: center;
     font-size: 10px;
   }
+}
 
-  /* Improve layout for side-by-side view */
-  @media (min-width: 768px) {
-    .card {
-      height: 100%;
-    }
-  }
+/* Instructions container */
+.instructions-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.instructions-container h2 {
+  color: var(--foreground);
+  margin-bottom: 20px;
+}
+
+.instructions-container h3 {
+  color: var(--primary);
+  margin-top: 24px;
+  margin-bottom: 12px;
+}
+
+.instructions-container ul {
+  margin-bottom: 20px;
+}
+
+.instructions-container li {
+  margin-bottom: 8px;
 }
 
