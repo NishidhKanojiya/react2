@@ -109,6 +109,7 @@ const GraphVisualizer = () => {
       f: Number.POSITIVE_INFINITY,
       g: Number.POSITIVE_INFINITY,
       h: Number.POSITIVE_INFINITY,
+      userDefinedH: false,
       previousNode: null,
     }
 
@@ -161,6 +162,9 @@ const GraphVisualizer = () => {
       nodes.map((node) => ({
         ...node,
         isEnd: node.id === id,
+        // If this is the new end node, set h to 0
+        h: node.id === id ? 0 : node.h,
+        userDefinedH: node.id === id ? true : node.userDefinedH,
       })),
     )
   }
@@ -182,8 +186,39 @@ const GraphVisualizer = () => {
     setEdges(edges.filter((edge) => edge.id !== id))
   }
 
+  // Add the handleSetHeuristic function and modify the runAStar function to use custom heuristic values
+
+  // Add this function after handleDeleteEdge
+  const handleSetHeuristicValue = (id, value) => {
+    if (isRunning) return
+
+    setNodes(
+      nodes.map((node) => {
+        if (node.id === id) {
+          return {
+            ...node,
+            h: value,
+            userDefinedH: true,
+          }
+        }
+        return node
+      }),
+    )
+  }
+
   // Calculate Euclidean distance heuristic
   const calculateHeuristic = (node, endNode) => {
+    // If this is the end node, heuristic is always 0
+    if (node.id === endNode.id) {
+      return 0
+    }
+
+    // If user has defined a heuristic value, use it
+    if (node.userDefinedH !== undefined) {
+      return node.h
+    }
+
+    // Otherwise calculate using Euclidean distance
     const dx = node.x - endNode.x
     const dy = node.y - endNode.y
     return Math.sqrt(dx * dx + dy * dy) / 100 // Scale down for better visualization
@@ -247,8 +282,8 @@ const GraphVisualizer = () => {
     const end = resetNodes.find((n) => n.id === endNode.id)
 
     start.g = 0
-    start.h = calculateHeuristic(start, end)
-    start.f = start.h
+    start.h = start.id === end.id ? 0 : start.userDefinedH ? start.h : calculateHeuristic(start, end)
+    start.f = start.g + start.h
     start.isOpen = true
     openList.push(start)
 
@@ -417,6 +452,7 @@ const GraphVisualizer = () => {
         f: Number.POSITIVE_INFINITY,
         g: Number.POSITIVE_INFINITY,
         h: Number.POSITIVE_INFINITY,
+        userDefinedH: false,
         previousNode: null,
       },
       {
@@ -432,6 +468,7 @@ const GraphVisualizer = () => {
         f: Number.POSITIVE_INFINITY,
         g: Number.POSITIVE_INFINITY,
         h: Number.POSITIVE_INFINITY,
+        userDefinedH: false,
         previousNode: null,
       },
     ]
@@ -475,63 +512,88 @@ const GraphVisualizer = () => {
     setNodes(step.nodes)
   }, [currentStep, isRunning, algorithmSteps])
 
+  const handleSetHeuristic = (nodeId, heuristic) => {
+    setNodes((prevNodes) =>
+      prevNodes.map((node) => (node.id === nodeId ? { ...node, h: Number.parseFloat(heuristic) } : node)),
+    )
+  }
+
+  // Modify the createDefaultGraph import to set default heuristic values
+  // Add this after the useEffect that initializes with default graph
+  useEffect(() => {
+    // Set heuristic value of end node to 0
+    const endNode = getEndNode()
+    if (endNode) {
+      handleSetHeuristic(endNode.id, 0)
+    }
+  }, [nodes])
+
   return (
     <div>
-      <GraphControls
-        isRunning={isRunning}
-        isPaused={isPaused}
-        animationSpeed={animationSpeed}
-        onRunAlgorithm={runAStar}
-        onTogglePause={handleTogglePause}
-        onStepForward={handleStepForward}
-        onReset={handleReset}
-        onCreateCustomGraph={handleCreateCustomGraph}
-        onSpeedChange={setAnimationSpeed}
-        onAddNode={handleAddNode}
-        onAddEdge={handleAddEdge}
-        onSetStartNode={handleSetStartNode}
-        onSetEndNode={handleSetEndNode}
-        onDeleteNode={handleDeleteNode}
-        onDeleteEdge={handleDeleteEdge}
-        nodes={nodes}
-        edges={edges}
-      />
-
-      <GraphLegend />
-
-      {isRunning && algorithmSteps.length > 0 && (
-        <AlgorithmSteps steps={algorithmSteps} currentStep={currentStep} onStepClick={setCurrentStep} />
-      )}
-
-      <div ref={graphContainerRef} className="graph-container">
-        {/* Render edges */}
-        {edges.map((edge) => (
-          <GraphEdge key={edge.id} edge={edge} nodes={nodes} isPath={pathEdges.includes(edge.id)} />
-        ))}
-
-        {/* Render nodes */}
-        {nodes.map((node) => (
-          <GraphNode
-            key={node.id}
-            node={node}
-            isSelected={node.id === selectedNode}
-            onClick={() => handleNodeClick(node.id)}
-            onDragEnd={handleNodeDragEnd}
+      <div className="flex flex-col md:flex-row gap-4">
+        {/* Left side - Controls */}
+        <div className="md:w-1/3">
+          <GraphControls
+            isRunning={isRunning}
+            isPaused={isPaused}
+            animationSpeed={animationSpeed}
+            onRunAlgorithm={runAStar}
+            onTogglePause={handleTogglePause}
+            onStepForward={handleStepForward}
+            onReset={handleReset}
+            onCreateCustomGraph={handleCreateCustomGraph}
+            onSpeedChange={setAnimationSpeed}
+            onAddNode={handleAddNode}
+            onAddEdge={handleAddEdge}
+            onSetStartNode={handleSetStartNode}
+            onSetEndNode={handleSetEndNode}
+            onDeleteNode={handleDeleteNode}
+            onDeleteEdge={handleDeleteEdge}
+            onSetHeuristic={handleSetHeuristicValue}
+            nodes={nodes}
+            edges={edges}
           />
-        ))}
-      </div>
 
-      <div className="card">
-        <h3 className="card-title">Instructions</h3>
-        <ul className="instructions">
-          <li>Click "Add New Node" to add a node to the graph</li>
-          <li>Drag nodes to position them on the graph</li>
-          <li>Use the "Set Start Node" and "Set End Node" dropdowns to designate start and end points</li>
-          <li>Add edges between nodes by selecting source and target nodes and specifying a weight</li>
-          <li>Click "Run A* Algorithm" to visualize the pathfinding process</li>
-          <li>Use the controls to pause, step through, or reset the visualization</li>
-          <li>The algorithm will find the shortest path based on edge weights</li>
-        </ul>
+          <div className="card">
+            <h3 className="card-title">Instructions</h3>
+            <ul className="instructions">
+              <li>Click "Add New Node" to add a node to the graph</li>
+              <li>Drag nodes to position them on the graph</li>
+              <li>Use the "Set Start Node" and "Set End Node" dropdowns to designate start and end points</li>
+              <li>Set heuristic values for each node (goal node will have h=0)</li>
+              <li>Add edges between nodes by selecting source and target nodes and specifying a weight</li>
+              <li>Click "Run A* Algorithm" to visualize the pathfinding process</li>
+              <li>Use the controls to pause, step through, or reset the visualization</li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Right side - Visualization */}
+        <div className="md:w-2/3">
+          <GraphLegend />
+
+          {isRunning && algorithmSteps.length > 0 && (
+            <AlgorithmSteps steps={algorithmSteps} currentStep={currentStep} onStepClick={setCurrentStep} />
+          )}
+
+          <div ref={graphContainerRef} className="graph-container">
+            {/* Render edges */}
+            {edges.map((edge) => (
+              <GraphEdge key={edge.id} edge={edge} nodes={nodes} isPath={pathEdges.includes(edge.id)} />
+            ))}
+
+            {/* Render nodes */}
+            {nodes.map((node) => (
+              <GraphNode
+                key={node.id}
+                node={node}
+                isSelected={node.id === selectedNode}
+                onClick={() => handleNodeClick(node.id)}
+                onDragEnd={handleNodeDragEnd}
+              />
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   )

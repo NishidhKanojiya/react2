@@ -39,11 +39,11 @@ const GraphNode = ({ node, isSelected, onClick, onDragEnd }) => {
       <div className={getNodeClass()} onClick={onClick}>
         <div className="node-content">
           <div className="node-id">{node.id}</div>
-          {node.f !== Number.POSITIVE_INFINITY && node.f != null && (
-            <div className="node-values">
-              <span>f:{node.f.toFixed(1)}</span>
-            </div>
-          )}
+          <div className="node-values">
+            {node.g !== Number.POSITIVE_INFINITY && <span>g:{node.g.toFixed(1)}</span>}
+            {node.h !== Number.POSITIVE_INFINITY && <span> h:{node.h.toFixed(1)}</span>}
+            {node.f !== Number.POSITIVE_INFINITY && <span> f:{node.f.toFixed(1)}</span>}
+          </div>
         </div>
       </div>
     </Draggable>

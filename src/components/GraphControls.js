@@ -18,6 +18,7 @@ const GraphControls = ({
   onSetEndNode,
   onDeleteNode,
   onDeleteEdge,
+  onSetHeuristic,
   nodes,
   edges,
 }) => {
@@ -30,6 +31,9 @@ const GraphControls = ({
   const [edgeToDelete, setEdgeToDelete] = useState("")
   const [showNodeControls, setShowNodeControls] = useState(true)
   const [showEdgeControls, setShowEdgeControls] = useState(true)
+  const [showHeuristicControls, setShowHeuristicControls] = useState(true)
+  const [nodeHeuristic, setNodeHeuristic] = useState("")
+  const [heuristicValue, setHeuristicValue] = useState(0)
 
   const handleAddEdge = () => {
     if (source && target && weight > 0) {
@@ -65,6 +69,13 @@ const GraphControls = ({
     if (edgeToDelete) {
       onDeleteEdge(edgeToDelete)
       setEdgeToDelete("")
+    }
+  }
+
+  const handleSetHeuristic = () => {
+    if (nodeHeuristic && heuristicValue >= 0) {
+      onSetHeuristic(nodeHeuristic, heuristicValue)
+      setHeuristicValue(0)
     }
   }
 
@@ -337,6 +348,85 @@ const GraphControls = ({
                   </svg>
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Heuristic Controls - New Section */}
+        <div className="card" style={{ margin: 0 }}>
+          <div className="collapsible-header" onClick={() => setShowHeuristicControls(!showHeuristicControls)}>
+            <h3 className="card-title-text">Heuristic Controls</h3>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              {showHeuristicControls ? (
+                <polyline points="18 15 12 9 6 15"></polyline>
+              ) : (
+                <polyline points="6 9 12 15 18 9"></polyline>
+              )}
+            </svg>
+          </div>
+
+          <div className="collapsible-content" style={{ maxHeight: showHeuristicControls ? "1000px" : "0" }}>
+            <div className="form-group">
+              <label htmlFor="nodeHeuristic" className="form-label">
+                Set Node Heuristic:
+              </label>
+              <div className="flex gap-2 mb-2">
+                <select
+                  id="nodeHeuristic"
+                  value={nodeHeuristic}
+                  onChange={(e) => setNodeHeuristic(e.target.value)}
+                  className="form-control"
+                  disabled={isRunning}
+                  style={{ flex: 1 }}
+                >
+                  <option value="">Select Node</option>
+                  {nodes.map((node) => (
+                    <option key={`heuristic-${node.id}`} value={node.id}>
+                      {node.id} {node.isEnd ? "(Goal - h=0)" : node.isStart ? "(Start)" : ""}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex gap-2">
+                <input
+                  id="heuristicValue"
+                  type="number"
+                  min="0"
+                  step="0.1"
+                  value={heuristicValue}
+                  onChange={(e) => setHeuristicValue(Number.parseFloat(e.target.value))}
+                  className="form-control"
+                  disabled={isRunning || (nodeHeuristic && nodes.find((n) => n.id === nodeHeuristic)?.isEnd)}
+                  placeholder="Heuristic value"
+                  style={{ flex: 1 }}
+                />
+                <button
+                  className="btn btn-primary"
+                  onClick={handleSetHeuristic}
+                  disabled={
+                    !nodeHeuristic || isRunning || (nodeHeuristic && nodes.find((n) => n.id === nodeHeuristic)?.isEnd)
+                  }
+                >
+                  Set H-Value
+                </button>
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <p className="text-sm text-muted-foreground">
+                Note: The goal node's heuristic value is automatically set to 0. The start node's g-value is set to 0.
+              </p>
             </div>
           </div>
         </div>
