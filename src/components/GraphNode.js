@@ -40,9 +40,15 @@ const GraphNode = ({ node, isSelected, onClick, onDragEnd }) => {
         <div className="node-content">
           <div className="node-id">{node.id}</div>
           <div className="node-values">
-            {node.g !== Number.POSITIVE_INFINITY && <span>g:{node.g.toFixed(1)}</span>}
-            {node.h !== Number.POSITIVE_INFINITY && <span> h:{node.h.toFixed(1)}</span>}
-            {node.f !== Number.POSITIVE_INFINITY && <span> f:{node.f.toFixed(1)}</span>}
+            {node.g !== undefined && node.g !== null && node.g !== Number.POSITIVE_INFINITY && (
+              <span>g:{node.g.toFixed(1)}</span>
+            )}
+            {node.h !== undefined && node.h !== null && node.h !== Number.POSITIVE_INFINITY && (
+              <span> h:{node.h.toFixed(1)}</span>
+            )}
+            {node.f !== undefined && node.f !== null && node.f !== Number.POSITIVE_INFINITY && (
+              <span> f:{node.f.toFixed(1)}</span>
+            )}
           </div>
         </div>
       </div>

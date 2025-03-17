@@ -72,10 +72,19 @@ const GraphControls = ({
     }
   }
 
+  // Update the handleSetHeuristic function to handle the goal node case better
   const handleSetHeuristic = () => {
-    if (nodeHeuristic && heuristicValue >= 0) {
-      onSetHeuristic(nodeHeuristic, heuristicValue)
-      setHeuristicValue(0)
+    if (nodeHeuristic) {
+      const selectedNode = nodes.find((n) => n.id === nodeHeuristic)
+
+      // If this is the goal node, always set h to 0
+      if (selectedNode && selectedNode.isEnd) {
+        onSetHeuristic(nodeHeuristic, 0)
+        setHeuristicValue(0)
+      } else if (heuristicValue >= 0) {
+        onSetHeuristic(nodeHeuristic, heuristicValue)
+        setHeuristicValue(0)
+      }
     }
   }
 

@@ -46,7 +46,7 @@ const AlgorithmSteps = ({ steps, currentStep, onStepClick }) => {
               >
                 <span className="step-number">{index + 1}</span>
                 <span>
-                  {step.description.length > 100 ? `${step.description.substring(0, 100)}...` : step.description}
+                  {step.description.length > 100 ? `${step.description.substring(0, 200)}...` : step.description}
                 </span>
               </div>
             ))}

@@ -214,7 +214,7 @@ const GraphVisualizer = () => {
     }
 
     // If user has defined a heuristic value, use it
-    if (node.userDefinedH !== undefined) {
+    if (node.userDefinedH) {
       return node.h
     }
 
@@ -265,7 +265,7 @@ const GraphVisualizer = () => {
       isOpen: false,
       f: Number.POSITIVE_INFINITY,
       g: Number.POSITIVE_INFINITY,
-      h: Number.POSITIVE_INFINITY,
+      h: node.userDefinedH ? node.h : Number.POSITIVE_INFINITY,
       previousNode: null,
     }))
 
@@ -281,8 +281,9 @@ const GraphVisualizer = () => {
     const start = resetNodes.find((n) => n.id === startNode.id)
     const end = resetNodes.find((n) => n.id === endNode.id)
 
+    // Initialize start node
     start.g = 0
-    start.h = start.id === end.id ? 0 : start.userDefinedH ? start.h : calculateHeuristic(start, end)
+    start.h = start.userDefinedH ? start.h : calculateHeuristic(start, end)
     start.f = start.g + start.h
     start.isOpen = true
     openList.push(start)
@@ -299,7 +300,15 @@ const GraphVisualizer = () => {
     // Main algorithm loop
     while (openList.length > 0) {
       // Sort open list by f value
-      openList.sort((a, b) => a.f - b.f)
+      openList.sort((a, b) => {
+        // First compare by f value
+        if (a.f !== b.f) {
+          return a.f - b.f
+        }
+        // If f values are equal, prefer the one with lower h value
+        // (this is a common tie-breaking strategy for A*)
+        return a.h - b.h
+      })
 
       // Get node with lowest f value
       const current = openList.shift()
@@ -331,7 +340,9 @@ const GraphVisualizer = () => {
         // Mark path nodes
         path.forEach((node) => {
           const nodeInResetNodes = resetNodes.find((n) => n.id === node.id)
-          nodeInResetNodes.isPath = true
+          if (nodeInResetNodes) {
+            nodeInResetNodes.isPath = true
+          }
         })
 
         // Add final step
@@ -358,6 +369,8 @@ const GraphVisualizer = () => {
       for (const { node: neighbor, weight } of neighbors) {
         const neighborInResetNodes = resetNodes.find((n) => n.id === neighbor.id)
 
+        if (!neighborInResetNodes) continue
+
         // Skip if neighbor is in closed list
         if (closedList.some((n) => n.id === neighbor.id)) {
           neighborDescription += ` ${neighbor.id} (skipped, already in CLOSED list);`
@@ -368,20 +381,31 @@ const GraphVisualizer = () => {
         const tentativeG = current.g + weight
 
         // Check if neighbor is in open list
-        const inOpenList = openList.some((n) => n.id === neighbor.id)
-        if (!inOpenList) {
+        const neighborInOpenList = openList.find((n) => n.id === neighbor.id)
+
+        if (!neighborInOpenList) {
           // Neighbor not in open list, add it
           neighborInResetNodes.g = tentativeG
-          neighborInResetNodes.h = calculateHeuristic(neighborInResetNodes, end)
+
+          // Use user-defined heuristic if available, otherwise calculate
+          if (!neighborInResetNodes.userDefinedH) {
+            neighborInResetNodes.h = calculateHeuristic(neighborInResetNodes, end)
+          }
+
           neighborInResetNodes.f = neighborInResetNodes.g + neighborInResetNodes.h
           neighborInResetNodes.previousNode = current
           neighborInResetNodes.isOpen = true
           openList.push(neighborInResetNodes)
 
           neighborDescription += ` Added ${neighbor.id} to OPEN list with f = ${neighborInResetNodes.f.toFixed(1)} (g = ${tentativeG.toFixed(1)}, h = ${neighborInResetNodes.h.toFixed(1)});`
-        } else if (tentativeG < neighborInResetNodes.g) {
+        } else if (tentativeG < neighborInOpenList.g) {
           // Found a better path to neighbor
-          neighborDescription += ` Updated ${neighbor.id} in OPEN list with better path (g: ${neighborInResetNodes.g.toFixed(1)} → ${tentativeG.toFixed(1)});`
+          neighborDescription += ` Updated ${neighbor.id} in OPEN list with better path (g: ${neighborInOpenList.g.toFixed(1)} → ${tentativeG.toFixed(1)});`
+          neighborInOpenList.g = tentativeG
+          neighborInOpenList.f = tentativeG + neighborInOpenList.h
+          neighborInOpenList.previousNode = current
+
+          // Also update the node in resetNodes
           neighborInResetNodes.g = tentativeG
           neighborInResetNodes.f = tentativeG + neighborInResetNodes.h
           neighborInResetNodes.previousNode = current
