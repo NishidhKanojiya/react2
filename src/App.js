@@ -34,7 +34,7 @@ function App() {
         </button>
       </div>
 
-      <main className="container">
+      <div className="container">
         {activeTab === "visualizer" ? (
           <GraphVisualizer />
         ) : activeTab === "instructions" ? (
@@ -46,10 +46,9 @@ function App() {
             <AlgorithmInfo />
           </div>
         )}
-      </main>
+      </div>
     </div>
   )
 }
 
 export default App
-

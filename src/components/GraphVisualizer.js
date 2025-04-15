@@ -7,6 +7,7 @@ import GraphControls from "./GraphControls"
 import GraphLegend from "./GraphLegend"
 import AlgorithmSteps from "./AlgorithmSteps"
 import { createDefaultGraph } from "../utils/graph-utils"
+import SpanningTreeVisualizer from "./SpanningTreeVisualizer"
 
 const GraphVisualizer = () => {
   const [nodes, setNodes] = useState([])
@@ -19,6 +20,7 @@ const GraphVisualizer = () => {
   const [animationSpeed, setAnimationSpeed] = useState(500)
   const [pathEdges, setPathEdges] = useState([])
   const [nextNodeId, setNextNodeId] = useState(1)
+  const [spanningTreeData, setSpanningTreeData] = useState(null)
 
   const animationTimeoutRef = useRef(null)
   const graphContainerRef = useRef(null)
@@ -63,6 +65,11 @@ const GraphVisualizer = () => {
           }
         }
         setPathEdges(pathEdgeIds)
+      }
+
+      // Update spanning tree data
+      if (step.treeData) {
+        setSpanningTreeData(step.treeData)
       }
     }
   }, [currentStep, algorithmSteps, edges])
@@ -271,6 +278,7 @@ const GraphVisualizer = () => {
 
     setNodes(resetNodes)
     setPathEdges([])
+    setSpanningTreeData(null)
 
     // Initialize algorithm
     const steps = []
@@ -288,12 +296,22 @@ const GraphVisualizer = () => {
     start.isOpen = true
     openList.push(start)
 
-    // Add initial step
+    // Initialize the spanning tree with the start node as root
+    const treeRoot = {
+      ...start,
+      children: [],
+    }
+    const treeNodeMap = {
+      [start.id]: treeRoot,
+    }
+
+    // Add initial step with tree data
     steps.push({
       nodes: JSON.parse(JSON.stringify(resetNodes)),
       openList: [...openList],
       closedList: [...closedList],
       currentNode: null,
+      treeData: { root: treeRoot },
       description: `Initialized A* algorithm. Added start node ${start.id} to the OPEN list with f = ${start.f.toFixed(1)} (g = 0, h = ${start.h.toFixed(1)}).`,
     })
 
@@ -323,6 +341,7 @@ const GraphVisualizer = () => {
         openList: [...openList],
         closedList: [...closedList],
         currentNode: current,
+        treeData: { root: treeRoot },
         description: `Selected node ${current.id} from OPEN list with lowest f value (${current.f.toFixed(1)}) and moved it to CLOSED list.`,
       })
 
@@ -345,6 +364,16 @@ const GraphVisualizer = () => {
           }
         })
 
+        // Mark path nodes in the spanning tree
+        if (path.length > 0) {
+          for (let i = 0; i < path.length; i++) {
+            const nodeId = path[i].id
+            if (treeNodeMap[nodeId]) {
+              treeNodeMap[nodeId].isPath = true
+            }
+          }
+        }
+
         // Add final step
         steps.push({
           nodes: JSON.parse(JSON.stringify(resetNodes)),
@@ -352,6 +381,7 @@ const GraphVisualizer = () => {
           closedList: [...closedList],
           currentNode: current,
           path: path,
+          treeData: { root: treeRoot },
           description: `Found path to target node ${end.id}! Path length: ${path.length - 1} steps.`,
         })
 
@@ -397,6 +427,47 @@ const GraphVisualizer = () => {
           neighborInResetNodes.isOpen = true
           openList.push(neighborInResetNodes)
 
+          // Add this node to the spanning tree
+          const treeNode = {
+            id: neighbor.id,
+            x: neighbor.x,
+            y: neighbor.y,
+            isStart: neighbor.isStart,
+            isEnd: neighbor.isEnd,
+            isVisited: false,
+            isPath: false,
+            isCurrent: false,
+            isOpen: true,
+            f: neighborInResetNodes.f,
+            g: neighborInResetNodes.g,
+            h: neighborInResetNodes.h,
+            children: [],
+          }
+
+          treeNodeMap[neighbor.id] = treeNode
+
+          // Make sure current node exists in the tree map
+          if (!treeNodeMap[current.id]) {
+            treeNodeMap[current.id] = {
+              id: current.id,
+              x: current.x,
+              y: current.y,
+              isStart: current.isStart,
+              isEnd: current.isEnd,
+              isVisited: true,
+              isPath: false,
+              isCurrent: true,
+              isOpen: false,
+              f: current.f,
+              g: current.g,
+              h: current.h,
+              children: [],
+            }
+          }
+
+          // Add the neighbor as a child of the current node
+          treeNodeMap[current.id].children.push(treeNode)
+
           neighborDescription += ` Added ${neighbor.id} to OPEN list with f = ${neighborInResetNodes.f.toFixed(1)} (g = ${tentativeG.toFixed(1)}, h = ${neighborInResetNodes.h.toFixed(1)});`
         } else if (tentativeG < neighborInOpenList.g) {
           // Found a better path to neighbor
@@ -409,6 +480,25 @@ const GraphVisualizer = () => {
           neighborInResetNodes.g = tentativeG
           neighborInResetNodes.f = tentativeG + neighborInResetNodes.h
           neighborInResetNodes.previousNode = current
+
+          // Update the tree structure - remove from old parent and add to new parent
+          if (treeNodeMap[neighbor.id]) {
+            // Find the old parent
+            Object.values(treeNodeMap).forEach((node) => {
+              if (node.children) {
+                node.children = node.children.filter((child) => child.id !== neighbor.id)
+              }
+            })
+
+            // Update the node values
+            treeNodeMap[neighbor.id].g = tentativeG
+            treeNodeMap[neighbor.id].f = tentativeG + treeNodeMap[neighbor.id].h
+
+            // Add to new parent
+            if (!treeNodeMap[current.id].children.some((child) => child.id === neighbor.id)) {
+              treeNodeMap[current.id].children.push(treeNodeMap[neighbor.id])
+            }
+          }
         } else {
           neighborDescription += ` ${neighbor.id} (already in OPEN list with better or equal path);`
         }
@@ -423,6 +513,7 @@ const GraphVisualizer = () => {
         openList: [...openList],
         closedList: [...closedList],
         currentNode: null,
+        treeData: { root: treeRoot },
         description: neighborDescription,
       })
     }
@@ -433,6 +524,7 @@ const GraphVisualizer = () => {
       openList: [],
       closedList: [...closedList],
       currentNode: null,
+      treeData: { root: treeRoot },
       description: `No path found from ${startNode.id} to ${endNode.id}.`,
     })
 
@@ -453,6 +545,7 @@ const GraphVisualizer = () => {
     setAlgorithmSteps([])
     setPathEdges([])
     setSelectedNode(null)
+    setSpanningTreeData(null)
 
     if (animationTimeoutRef.current) {
       clearTimeout(animationTimeoutRef.current)
@@ -508,6 +601,7 @@ const GraphVisualizer = () => {
     setAlgorithmSteps([])
     setPathEdges([])
     setSelectedNode(null)
+    setSpanningTreeData(null)
 
     if (animationTimeoutRef.current) {
       clearTimeout(animationTimeoutRef.current)
@@ -547,9 +641,10 @@ const GraphVisualizer = () => {
   }, [nodes])
 
   return (
-    <div className="two-column-layout">
+    <div className="three-column-layout">
       {/* Left column - Controls */}
       <div className="controls-column">
+        <h2 className="column-title">Controls</h2>
         <GraphControls
           isRunning={isRunning}
           isPaused={isPaused}
@@ -572,8 +667,9 @@ const GraphVisualizer = () => {
         />
       </div>
 
-      {/* Right column - Visualization */}
-      <div className="visualization-column">
+      {/* Middle column - Graph Visualization */}
+      <div className="graph-column">
+        <h2 className="column-title">Graph Visualization</h2>
         <GraphLegend />
 
         {isRunning && algorithmSteps.length > 0 && (
@@ -598,9 +694,14 @@ const GraphVisualizer = () => {
           ))}
         </div>
       </div>
+
+      {/* Right column - Spanning Tree Visualization */}
+      <div className="tree-column">
+        <h2 className="column-title">A* Search Tree</h2>
+        <SpanningTreeVisualizer nodes={nodes} treeData={spanningTreeData} currentStep={currentStep} />
+      </div>
     </div>
   )
 }
 
 export default GraphVisualizer
-
