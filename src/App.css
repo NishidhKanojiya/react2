@@ -470,63 +470,8 @@ body {
 
 @media (min-width: 1200px) {
   .three-column-layout {
-    grid-template-columns: 25% 37.5% 37.5%;
+    grid-template-columns: 25% 50% 25%;
   }
-}
-
-/* Spanning tree specific styles */
-.spanning-tree-container {
-  background-color: var(--card-dark);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 16px;
-  height: 550px;
-  display: flex;
-  flex-direction: column;
-}
-
-.spanning-tree-canvas {
-  background-color: var(--card-dark);
-  border-radius: 8px;
-  flex-grow: 1;
-}
-
-.tree-placeholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  color: var(--secondary);
-  text-align: center;
-  padding: 20px;
-  font-size: 16px;
-  background-color: rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
-}
-
-/* Instructions container */
-.instructions-container {
-  max-width: 800px;
-  margin: 0 auto;
-}
-
-.instructions-container h2 {
-  color: var(--foreground);
-  margin-bottom: 20px;
-}
-
-.instructions-container h3 {
-  color: var(--primary);
-  margin-top: 24px;
-  margin-bottom: 12px;
-}
-
-.instructions-container ul {
-  margin-bottom: 20px;
-}
-
-.instructions-container li {
-  margin-bottom: 8px;
 }
 
 /* Column titles */
@@ -538,13 +483,62 @@ body {
   color: var(--foreground);
 }
 
+/* Algorithm lists */
+.algorithm-lists {
+  margin-top: 16px;
+}
+
+.list-section {
+  margin-bottom: 16px;
+}
+
+.list-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--foreground);
+}
+
+.list-content {
+  background-color: #374151;
+  border-radius: 4px;
+  padding: 12px;
+}
+
+.node-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.list-node {
+  background-color: var(--card-dark);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.875rem;
+}
+
+.empty-list {
+  color: var(--secondary);
+  font-style: italic;
+}
+
+/* Text utilities */
+.text-center {
+  text-align: center;
+}
+
+.text-sm {
+  font-size: 0.875rem;
+}
+
+.text-muted-foreground {
+  color: var(--secondary);
+}
+
 /* Responsive adjustments for smaller screens */
 @media (max-width: 1199px) {
   .three-column-layout {
     grid-template-columns: 1fr;
-  }
-
-  .spanning-tree-container {
-    height: 500px;
   }
 }
