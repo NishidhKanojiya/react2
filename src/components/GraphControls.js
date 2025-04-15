@@ -29,9 +29,9 @@ const GraphControls = ({
   const [endNode, setEndNode] = useState("")
   const [nodeToDelete, setNodeToDelete] = useState("")
   const [edgeToDelete, setEdgeToDelete] = useState("")
-  const [showNodeControls, setShowNodeControls] = useState(true)
-  const [showEdgeControls, setShowEdgeControls] = useState(true)
-  const [showHeuristicControls, setShowHeuristicControls] = useState(true)
+  const [showNodeControls, setShowNodeControls] = useState(false)
+  const [showEdgeControls, setShowEdgeControls] = useState(false)
+  const [showHeuristicControls, setShowHeuristicControls] = useState(false)
   const [nodeHeuristic, setNodeHeuristic] = useState("")
   const [heuristicValue, setHeuristicValue] = useState(0)
 

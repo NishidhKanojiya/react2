@@ -611,7 +611,7 @@ const GraphVisualizer = () => {
 
       {/* Right column - Algorithm Steps and Lists */}
       <div className="algorithm-column">
-        <h2 className="column-title">Algorithm Progress</h2>
+        <h2 className="column-title">Algorithm Steps and Lists</h2>
 
         {isRunning && algorithmSteps.length > 0 && (
           <>
