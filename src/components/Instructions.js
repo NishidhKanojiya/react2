@@ -15,7 +15,6 @@ const Instructions = () => {
           <li>Set heuristic values for each node (goal node will have h=0 by default)</li>
           <li>Add edges between nodes by selecting source and target nodes and specifying a weight</li>
           <li>Click "Run A* Algorithm" to visualize the pathfinding process</li>
-          <li>Use the controls to pause, step through, or reset the visualization</li>
         </ul>
   
         <h3 className="mb-2" style={{ fontSize: "1.25rem", fontWeight: "600", marginTop: "24px" }}>
@@ -62,7 +61,6 @@ const Instructions = () => {
         <ul className="instructions">
           <li>Use the "Create Custom Graph" button to start with a minimal graph</li>
           <li>You can adjust the animation speed to slow down or speed up the visualization</li>
-          <li>Click on a step in the Algorithm Steps section to jump to that specific step</li>
           <li>Experiment with different heuristic values to see how they affect the path finding</li>
         </ul>
       </div>
