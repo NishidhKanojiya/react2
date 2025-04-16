@@ -19,7 +19,7 @@ const GraphVisualizer = () => {
   const [algorithmSteps, setAlgorithmSteps] = useState([])
   const [animationSpeed, setAnimationSpeed] = useState(500)
   const [pathEdges, setPathEdges] = useState([])
-  const [nextNodeId, setNextNodeId] = useState(1)
+  const [nextNodeId, setNextNodeId] = useState(0)
 
   const animationTimeoutRef = useRef(null)
   const graphContainerRef = useRef(null)
@@ -29,7 +29,7 @@ const GraphVisualizer = () => {
     const { nodes: defaultNodes, edges: defaultEdges } = createDefaultGraph()
     setNodes(defaultNodes)
     setEdges(defaultEdges)
-    setNextNodeId(defaultNodes.length + 1)
+    setNextNodeId(6) // Start from G (index 6)
   }, [])
 
   // Auto-advance steps
@@ -97,8 +97,11 @@ const GraphVisualizer = () => {
     const newX = centerX + Math.random() * 100 - 50
     const newY = centerY + Math.random() * 100 - 50
 
+    // Generate the next letter (A=65, B=66, etc.)
+    const nextLetter = String.fromCharCode(65 + nextNodeId)
+
     const newNode = {
-      id: `${nextNodeId}`,
+      id: nextLetter,
       x: newX,
       y: newY,
       isStart: false,
@@ -344,6 +347,9 @@ const GraphVisualizer = () => {
           }
         })
 
+        // Format the path as a string
+        const pathString = path.map((node) => node.id).join(" → ")
+
         // Add final step
         steps.push({
           nodes: JSON.parse(JSON.stringify(resetNodes)),
@@ -351,7 +357,7 @@ const GraphVisualizer = () => {
           closedList: [...closedList],
           currentNode: current,
           path: path,
-          description: `Found path to target node ${end.id}! Path length: ${path.length - 1} steps.`,
+          description: `Found path to target node ${end.id}! Path length: ${path.length - 1} steps. Path: ${pathString}`,
         })
 
         setAlgorithmSteps(steps)
@@ -463,7 +469,7 @@ const GraphVisualizer = () => {
     // Create a blank graph with just two nodes
     const customNodes = [
       {
-        id: "1",
+        id: "A",
         x: 150,
         y: 150,
         isStart: true,
@@ -479,7 +485,7 @@ const GraphVisualizer = () => {
         previousNode: null,
       },
       {
-        id: "2",
+        id: "B",
         x: 450,
         y: 150,
         isStart: false,
@@ -500,7 +506,7 @@ const GraphVisualizer = () => {
 
     setNodes(customNodes)
     setEdges(customEdges)
-    setNextNodeId(3)
+    setNextNodeId(2) // Start from C (index 2)
     setIsRunning(false)
     setIsPaused(false)
     setCurrentStep(0)

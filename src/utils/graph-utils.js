@@ -2,7 +2,7 @@ export const createDefaultGraph = () => {
   // Create default nodes
   const nodes = [
     {
-      id: "1",
+      id: "A",
       x: 150,
       y: 100,
       isStart: true,
@@ -18,7 +18,7 @@ export const createDefaultGraph = () => {
       previousNode: null,
     },
     {
-      id: "2",
+      id: "B",
       x: 300,
       y: 150,
       isStart: false,
@@ -34,7 +34,7 @@ export const createDefaultGraph = () => {
       previousNode: null,
     },
     {
-      id: "3",
+      id: "C",
       x: 450,
       y: 100,
       isStart: false,
@@ -50,7 +50,7 @@ export const createDefaultGraph = () => {
       previousNode: null,
     },
     {
-      id: "4",
+      id: "D",
       x: 150,
       y: 250,
       isStart: false,
@@ -66,7 +66,7 @@ export const createDefaultGraph = () => {
       previousNode: null,
     },
     {
-      id: "5",
+      id: "E",
       x: 300,
       y: 300,
       isStart: false,
@@ -82,7 +82,7 @@ export const createDefaultGraph = () => {
       previousNode: null,
     },
     {
-      id: "6",
+      id: "F",
       x: 450,
       y: 250,
       isStart: false,
@@ -101,17 +101,16 @@ export const createDefaultGraph = () => {
 
   // Create default edges
   const edges = [
-    { id: "1_2", source: "1", target: "2", weight: 1 },
-    { id: "1_4", source: "1", target: "4", weight: 1.5 },
-    { id: "2_3", source: "2", target: "3", weight: 1 },
-    { id: "2_5", source: "2", target: "5", weight: 1.5 },
-    { id: "3_6", source: "3", target: "6", weight: 1.5 },
-    { id: "4_5", source: "4", target: "5", weight: 1 },
-    { id: "5_6", source: "5", target: "6", weight: 1 },
-    { id: "2_4", source: "2", target: "4", weight: 2 },
-    { id: "3_5", source: "3", target: "5", weight: 2 },
+    { id: "A_B", source: "A", target: "B", weight: 1 },
+    { id: "A_D", source: "A", target: "D", weight: 1.5 },
+    { id: "B_C", source: "B", target: "C", weight: 1 },
+    { id: "B_E", source: "B", target: "E", weight: 1.5 },
+    { id: "C_F", source: "C", target: "F", weight: 1.5 },
+    { id: "D_E", source: "D", target: "E", weight: 1 },
+    { id: "E_F", source: "E", target: "F", weight: 1 },
+    { id: "B_D", source: "B", target: "D", weight: 2 },
+    { id: "C_E", source: "C", target: "E", weight: 2 },
   ]
 
   return { nodes, edges }
 }
-
